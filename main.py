@@ -14,8 +14,9 @@ def goodness_score(pos_acts, neg_acts, threshold=2):
 
 
 class FF_Layer(nn.Linear):
-    def __init__(self, in_features: int, out_features: int, n_epochs: int, bias: bool, device):
+    def __init__(self, in_features: int, out_features: int, n_epochs: int, bias: bool, keep_vals: bool, device):
         super().__init__(in_features, out_features, bias=bias)
+        self.keep_vals = keep_vals
         self.n_epochs = n_epochs
         self.opt = torch.optim.Adam(self.parameters())
         self.goodness = goodness_score
@@ -30,18 +31,21 @@ class FF_Layer(nn.Linear):
 
 class Unsupervised_FF(nn.Module):
     def __init__(self, n_layers: int = 4, n_neurons=2000, input_size: int = 28 * 28, n_epochs: int = 100,
-                 bias: bool = True, n_classes: int = 10, device=torch.device("cuda:0")):
+                 bias: bool = True, n_classes: int = 10, n_hid_to_log: int = 3, device=torch.device("cuda:0")):
         super().__init__()
+        self.n_hid_to_log = n_hid_to_log
         self.n_epochs = n_epochs
         self.device = device
 
-        ff_layers = [
-            FF_Layer(in_features=input_size, out_features=n_neurons, n_epochs=n_epochs, bias=bias, device=device)]
         ln_layers = [nn.LayerNorm(normalized_shape=[1, n_neurons]) for _ in range(n_layers)]
         ln_layers = [layer.to(device) for layer in ln_layers]
-        for _ in range(n_layers - 1):
-            ff_layers.append(
-                FF_Layer(in_features=n_neurons, out_features=n_neurons, n_epochs=n_epochs, bias=bias, device=device))
+        ff_layers = [
+            FF_Layer(in_features=input_size if idx == 0 else n_neurons,
+                     out_features=n_neurons,
+                     n_epochs=n_epochs,
+                     bias=bias,
+                     keep_vals=True if idx > n_layers - n_hid_to_log - 1 else False,
+                     device=device) for idx in range(n_layers)]
 
         self.ff_layers = ff_layers
         self.ln_layers = ln_layers
@@ -109,7 +113,7 @@ def train(model: Unsupervised_FF, pos_dataloader: DataLoader, neg_dataloader: Da
 if __name__ == '__main__':
     prepare_data()
     device = torch.device("cuda:0")
-    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=100)
+    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=1)
     # Load the MNIST dataset
     from torchvision import transforms
 

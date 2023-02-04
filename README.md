@@ -1,6 +1,6 @@
 # FF_unsupervised
 
-An implementation of unsupervised example of the Forward-Forward algorithm proposed
+(In progress) An implementation of unsupervised example of the Forward-Forward algorithm proposed
 by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 
 .  
