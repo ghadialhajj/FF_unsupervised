@@ -20,13 +20,18 @@ class FF_Layer(nn.Linear):
         self.opt = torch.optim.Adam(self.parameters())
         self.goodness = goodness_score
         self.to(device)
-        self.output = None
+        self.ln_layer = nn.LayerNorm(normalized_shape=[1, out_features]).to(device)
 
     def ff_train(self, pos_acts, neg_acts):
         self.opt.zero_grad()
         goodness = self.goodness(pos_acts, neg_acts)
         goodness.backward()
         self.opt.step()
+
+    def forward(self, input):
+        input = super().forward(input)
+        input = self.ln_layer(input.detach())
+        return input
 
 
 class Unsupervised_FF(nn.Module):
@@ -37,8 +42,6 @@ class Unsupervised_FF(nn.Module):
         self.n_epochs = n_epochs
         self.device = device
 
-        ln_layers = [nn.LayerNorm(normalized_shape=[1, n_neurons]) for _ in range(n_layers)]
-        ln_layers = [layer.to(device) for layer in ln_layers]
         ff_layers = [
             FF_Layer(in_features=input_size if idx == 0 else n_neurons,
                      out_features=n_neurons,
@@ -47,7 +50,6 @@ class Unsupervised_FF(nn.Module):
                      device=device) for idx in range(n_layers)]
 
         self.ff_layers = ff_layers
-        self.ln_layers = ln_layers
         self.last_layer = nn.Linear(in_features=n_neurons * n_hid_to_log, out_features=n_classes, bias=bias)
         self.to(device)
         self.opt = torch.optim.Adam(self.last_layer.parameters())
@@ -67,15 +69,12 @@ class Unsupervised_FF(nn.Module):
                     pos_acts = layer(pos_acts)
                     neg_acts = layer(neg_acts)
                     layer.ff_train(pos_acts, neg_acts)
-                    pos_acts = self.ln_layers[idx](pos_acts.detach())
-                    neg_acts = self.ln_layers[idx](neg_acts.detach())
 
     def train_last_layer(self, dataloader: DataLoader):
         num_examples = len(dataloader)
         outer_tqdm = tqdm(range(self.n_epochs), desc="Training Last Layer", position=0)
         loss_list = []
         for epoch in outer_tqdm:
-            # todo fix progress bar
             epoch_loss = 0
             inner_tqdm = tqdm(dataloader, desc=f"Training Last Layer | Epoch {epoch}", leave=False, position=1)
             for images, labels in inner_tqdm:
@@ -89,13 +88,9 @@ class Unsupervised_FF(nn.Module):
                 self.opt.step()
             loss_list.append(epoch_loss / num_examples)
             # Update progress bar with current loss
-            desc = f'Epcohs={epoch} | loss={loss.detach().cpu().numpy():.4f}'
-            outer_tqdm.set_description(desc)
-            outer_tqdm.update()
         return [l.detach().cpu().numpy() for l in loss_list]
 
     def forward(self, image: torch.Tensor):
-        # todo Use the last three layers as input
         image = image.to(self.device)
         image = torch.reshape(image, (image.shape[0], 1, -1))
         concat_output = []
@@ -116,7 +111,7 @@ def train(model: Unsupervised_FF, pos_dataloader: DataLoader, neg_dataloader: Da
 if __name__ == '__main__':
     prepare_data()
     device = torch.device("cuda:0")
-    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=1)
+    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=100)
     # Load the MNIST dataset
     from torchvision import transforms
 
@@ -137,4 +132,4 @@ if __name__ == '__main__':
     loss_list = train(unsupervised_ff, pos_dataloader, neg_dataloader)
     fig = plt.figure()
     plt.plot(loss_list)
-    plt.savefig("fig.png")
+    plt.savefig("Loss.png")
