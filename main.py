@@ -14,13 +14,13 @@ def goodness_score(pos_acts, neg_acts, threshold=2):
 
 
 class FF_Layer(nn.Linear):
-    def __init__(self, in_features: int, out_features: int, n_epochs: int, bias: bool, keep_vals: bool, device):
+    def __init__(self, in_features: int, out_features: int, n_epochs: int, bias: bool, device):
         super().__init__(in_features, out_features, bias=bias)
-        self.keep_vals = keep_vals
         self.n_epochs = n_epochs
         self.opt = torch.optim.Adam(self.parameters())
         self.goodness = goodness_score
         self.to(device)
+        self.output = None
 
     def ff_train(self, pos_acts, neg_acts):
         self.opt.zero_grad()
@@ -44,12 +44,11 @@ class Unsupervised_FF(nn.Module):
                      out_features=n_neurons,
                      n_epochs=n_epochs,
                      bias=bias,
-                     keep_vals=True if idx > n_layers - n_hid_to_log - 1 else False,
                      device=device) for idx in range(n_layers)]
 
         self.ff_layers = ff_layers
         self.ln_layers = ln_layers
-        self.last_layer = nn.Linear(in_features=n_neurons, out_features=n_classes, bias=bias)
+        self.last_layer = nn.Linear(in_features=n_neurons * n_hid_to_log, out_features=n_classes, bias=bias)
         self.to(device)
         self.opt = torch.optim.Adam(self.last_layer.parameters())
         self.loss = torch.nn.CrossEntropyLoss(reduction="mean")
@@ -99,9 +98,13 @@ class Unsupervised_FF(nn.Module):
         # todo Use the last three layers as input
         image = image.to(self.device)
         image = torch.reshape(image, (image.shape[0], 1, -1))
-        for layer in self.ff_layers:
+        concat_output = []
+        for idx, layer in enumerate(self.ff_layers):
             image = layer(image)
-        logits = self.last_layer(image)
+            if idx > len(self.ff_layers) - self.n_hid_to_log - 1:
+                concat_output.append(image)
+        concat_output = torch.concat(concat_output, 2)
+        logits = self.last_layer(concat_output)
         return logits.squeeze()
 
 
