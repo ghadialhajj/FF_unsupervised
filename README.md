@@ -3,9 +3,9 @@
 An implementation of unsupervised example of the Forward-Forward algorithm proposed
 by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 
-.
-├── main.py
-├── prepare_data.py
+.  
+├── main.py  
+├── prepare_data.py  
 └── utils.py
 
 The `utils.py` file has the functions to generate the negative examples.
