@@ -10,8 +10,7 @@ File structure:
 ├── main.py  
 ├── main.ipynb  
 ├── utils.py  
-├── train_data  
-├── test_data  
+├── MNIST  
 ├── environment.yml  
 ├── README.md  
 └── LICENSE
