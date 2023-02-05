@@ -1,5 +1,8 @@
 # FF_unsupervised
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ghadialhajj/FF_unsupervised/blob/master/main.ipynb)
+
+
 An implementation of unsupervised example of the Forward-Forward algorithm proposed
 by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 
@@ -7,7 +10,7 @@ by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 ├── main.py  
 ├── prepare_data.py  
 ├── utils.py  
-├── README.md 
+├── README.md  
 └── LICENSE
 
 The `utils.py` file has the functions to generate the negative examples.
