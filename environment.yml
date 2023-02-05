@@ -2,12 +2,14 @@ name: FF_unsupervised
 channels:
   - pytorch
   - conda-forge
+  - nvidia
 dependencies:
   - matplotlib
   - numpy
   - pillow
   - python=3.8
   - pytorch=1.13.1
+  - nvidia::cudatoolkit=10.1
   - pytorch-cuda=11.6
   - scikit-learn
   - scipy
