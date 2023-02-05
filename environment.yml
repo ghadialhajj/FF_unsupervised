@@ -1,17 +1,15 @@
 name: FF_unsupervised
 channels:
   - pytorch
-  - nvidia
   - conda-forge
-  - defaults
 dependencies:
-  - matplotlib=3.6.3=py38h578d9bd_0
-  - numpy=1.23.5=py38h14f4228_0
-  - pillow=9.4.0=py38hde6dc18_1
-  - python=3.8.16=he550d4f_1_cpython
+  - matplotlib
+  - numpy
+  - pillow
+  - python=3.8
   - pytorch=1.13.1=py3.8_cuda11.6_cudnn8.3.2_0
-  - pytorch-cuda=11.6=h867d48c_1
-  - scikit-learn=1.2.1=py38h1e1a916_0
-  - scipy=1.10.0=py38h10c12cc_0
-  - torchvision=0.14.1=py38_cu116
-  - tqdm=4.64.1=pyhd8ed1ab_0
+  - pytorch-cuda=11.6
+  - scikit-learn
+  - scipy
+  - torchvision
+  - tqdm
