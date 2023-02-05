@@ -175,7 +175,7 @@ if __name__ == '__main__':
     transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor()
     ])
-    pos_dataset = torchvision.datasets.MNIST(root='train_data/', download=True, transform=transform)
+    pos_dataset = torchvision.datasets.MNIST(root='train_data/', download=False, transform=transform)
     # pos_dataset = Subset(pos_dataset, list(range(1000)))
     # Create the data loader
     pos_dataloader = DataLoader(pos_dataset, batch_size=64, shuffle=True, num_workers=4)
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     neg_dataloader = DataLoader(neg_dataset, batch_size=64, shuffle=True, num_workers=4)
 
     # Load the test images
-    test_dataset = torchvision.datasets.MNIST(root='test_data/', train=False, download=True, transform=transform)
+    test_dataset = torchvision.datasets.MNIST(root='test_data/', train=False, download=False, transform=transform)
     # Create the data loader
     test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=4)
 
