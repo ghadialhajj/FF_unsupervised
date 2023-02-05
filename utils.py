@@ -15,12 +15,12 @@ def prepare_data():
     ])
 
     # Load the train MNIST dataset
-    train_mnist_dataset = torchvision.datasets.MNIST(root='./train_data/', train=True, transform=transform,
-                                                     download=False)
+    train_mnist_dataset = torchvision.datasets.MNIST(root="./", train=True, transform=transform,
+                                                     download=True)
     n_train_samples = len(train_mnist_dataset)
     # Load the test MNIST dataset
-    test_mnist_dataset = torchvision.datasets.MNIST(root='./test_data/', train=False, transform=transform,
-                                                    download=False)
+    test_mnist_dataset = torchvision.datasets.MNIST(root="./", train=False, transform=transform,
+                                                    download=True)
 
     if not os.path.exists("transformed_dataset.pt"):
         random_pairs = np.random.randint(n_train_samples, size=[n_train_samples, 2])
@@ -33,17 +33,6 @@ def prepare_data():
 
         # Save the transformed images to a folder
         torch.save(transformed_dataset, 'transformed_dataset.pt')
-
-    # Load the transformed images
-    transformed_dataset = torch.load('transformed_dataset.pt')
-
-    # Create a dataset from the transformed images
-    dataset = torch.utils.data.TensorDataset(torch.stack(transformed_dataset))
-
-    # Create a dataloader from the dataset
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
-
-    return dataloader
 
 
 def create_mask(shape, iterations: int = 10):
