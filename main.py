@@ -5,12 +5,34 @@ from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from prepare_data import prepare_data
+from sklearn.metrics import accuracy_score
 
 
 def goodness_score(pos_acts, neg_acts, threshold=2):
+    """
+    Compute the goodness score for a given set of positive and negative activations.
+
+    Parameters:
+
+    pos_acts (torch.Tensor): Numpy array of positive activations.
+    neg_acts (torch.Tensor): Numpy array of negative activations.
+    threshold (int, optional): Threshold value used to compute the score. Default is 2.
+
+    Returns:
+
+    goodness (torch.Tensor): Goodness score computed as the sum of positive and negative goodness values. Note that this
+    score is actually the quantity that is optimized and not the goodness itself. The goodness itself is the same
+    quantity but without the threshold subtraction
+    """
+
     pos_goodness = -torch.sum(torch.pow(pos_acts, 2)) + threshold
     neg_goodness = torch.sum(torch.pow(neg_acts, 2)) - threshold
     return torch.add(pos_goodness, neg_goodness)
+
+
+def get_metrics(preds, labels):
+    acc = accuracy_score(labels, preds)
+    return dict(accuracy_score=acc)
 
 
 class FF_Layer(nn.Linear):
@@ -23,6 +45,15 @@ class FF_Layer(nn.Linear):
         self.ln_layer = nn.LayerNorm(normalized_shape=[1, out_features]).to(device)
 
     def ff_train(self, pos_acts, neg_acts):
+        """
+        Train the layer using positive and negative activations.
+
+        Parameters:
+
+        pos_acts (numpy.ndarray): Numpy array of positive activations.
+        neg_acts (numpy.ndarray): Numpy array of negative activations.
+        """
+
         self.opt.zero_grad()
         goodness = self.goodness(pos_acts, neg_acts)
         goodness.backward()
@@ -102,16 +133,46 @@ class Unsupervised_FF(nn.Module):
         logits = self.last_layer(concat_output)
         return logits.squeeze()
 
+    def evaluate(self, dataloader: DataLoader, dataset_type: str = "train"):
+        self.eval()
+        inner_tqdm = tqdm(dataloader, desc=f"Evaluating model", leave=False, position=1)
+        all_labels = []
+        all_preds = []
+        for images, labels in inner_tqdm:
+            images = images.to(self.device)
+            labels = labels.to(self.device)
+            preds = self(images)
+            preds = torch.argmax(preds, 1)
+            all_labels.append(labels.detach().cpu())
+            all_preds.append(preds.detach().cpu())
+        all_labels = torch.concat(all_labels, 0).numpy()
+        all_preds = torch.concat(all_preds, 0).numpy()
+        metrics_dict = get_metrics(all_preds, all_labels)
+        print(f"{dataset_type} dataset scores: ", "\n".join([f"{key}: {value}" for key, value in metrics_dict.items()]))
+
 
 def train(model: Unsupervised_FF, pos_dataloader: DataLoader, neg_dataloader: DataLoader):
+    model.train()
     model.train_ff_layers(pos_dataloader, neg_dataloader)
     return model.train_last_layer(pos_dataloader)
+
+
+def plot_loss(loss):
+    # plot the loss over epochs
+    fig = plt.figure()
+    plt.plot(list(range(len(loss))), loss)
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("Loss Plot")
+    plt.savefig("Loss Plot.png")
+    plt.show()
 
 
 if __name__ == '__main__':
     prepare_data()
     device = torch.device("cuda:0")
-    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=100)
+    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=20)
+
     # Load the MNIST dataset
     from torchvision import transforms
 
@@ -125,11 +186,17 @@ if __name__ == '__main__':
 
     # Load the transformed images
     neg_dataset = torch.load('transformed_dataset.pt')
-    # neg_dataset = Subset(neg_dataset, list(range(1000)))
     # Create the data loader
     neg_dataloader = DataLoader(neg_dataset, batch_size=64, shuffle=True, num_workers=4)
 
+    # Load the test images
+    test_dataset = torchvision.datasets.MNIST(root='test_data/', download=True, transform=transform)
+    # Create the data loader
+    test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=4)
+
     loss_list = train(unsupervised_ff, pos_dataloader, neg_dataloader)
-    fig = plt.figure()
-    plt.plot(loss_list)
-    plt.savefig("Loss.png")
+
+    plot_loss(loss_list)
+
+    unsupervised_ff.evaluate(pos_dataloader, dataset_type="Train")
+    unsupervised_ff.evaluate(test_dataloader, dataset_type="Test")
