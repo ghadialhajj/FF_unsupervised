@@ -93,8 +93,8 @@ class Unsupervised_FF(nn.Module):
                               leave=False, position=1)
             for pos_data, neg_imgs in inner_tqdm:
                 pos_imgs, _ = pos_data
-                pos_acts = torch.reshape(pos_imgs, (pos_imgs.shape[0], 1, -1)).to(device)
-                neg_acts = torch.reshape(neg_imgs, (neg_imgs.shape[0], 1, -1)).to(device)
+                pos_acts = torch.reshape(pos_imgs, (pos_imgs.shape[0], 1, -1)).to(self.device)
+                neg_acts = torch.reshape(neg_imgs, (neg_imgs.shape[0], 1, -1)).to(self.device)
 
                 for idx, layer in enumerate(self.ff_layers):
                     pos_acts = layer(pos_acts)
@@ -170,14 +170,10 @@ def plot_loss(loss):
 
 if __name__ == '__main__':
     prepare_data()
-    device = torch.device("cuda:0")
-    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=20)
 
     # Load the MNIST dataset
-    from torchvision import transforms
-
-    transform = transforms.Compose([
-        transforms.ToTensor()
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor()
     ])
     pos_dataset = torchvision.datasets.MNIST(root='train_data/', download=True, transform=transform)
     # pos_dataset = Subset(pos_dataset, list(range(1000)))
@@ -190,13 +186,16 @@ if __name__ == '__main__':
     neg_dataloader = DataLoader(neg_dataset, batch_size=64, shuffle=True, num_workers=4)
 
     # Load the test images
-    test_dataset = torchvision.datasets.MNIST(root='test_data/', download=True, transform=transform)
+    test_dataset = torchvision.datasets.MNIST(root='test_data/', train=False, download=True, transform=transform)
     # Create the data loader
     test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=4)
 
-    loss_list = train(unsupervised_ff, pos_dataloader, neg_dataloader)
+    device = torch.device("cuda:0")
+    unsupervised_ff = Unsupervised_FF(device=device, n_epochs=2)
 
-    plot_loss(loss_list)
+    loss = train(unsupervised_ff, pos_dataloader, neg_dataloader)
+
+    plot_loss(loss)
 
     unsupervised_ff.evaluate(pos_dataloader, dataset_type="Train")
     unsupervised_ff.evaluate(test_dataloader, dataset_type="Test")
