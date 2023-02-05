@@ -3,15 +3,15 @@ import torch
 from matplotlib import pyplot as plt
 from scipy.signal import convolve2d
 from torch import tensor, Tensor
-import torchvision.transforms as transforms
+import torchvision
 from tqdm import tqdm
 import os
 
 
 def prepare_data():
     # Define the transform function
-    transform = transforms.Compose([
-        transforms.ToTensor()
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor()
     ])
 
     # Load the train MNIST dataset
@@ -126,8 +126,6 @@ def create_negative_batch(images: Tensor):
 
 
 if __name__ == '__main__':
-    import torchvision
-
     # Load the MNIST dataset
     mnist = torchvision.datasets.MNIST(root='data/', download=True)
 
