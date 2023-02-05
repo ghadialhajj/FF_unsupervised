@@ -7,7 +7,7 @@ dependencies:
   - numpy
   - pillow
   - python=3.8
-  - pytorch=1.13.1=py3.8_cuda11.6_cudnn8.3.2_0
+  - pytorch=1.13.1
   - pytorch-cuda=11.6
   - scikit-learn
   - scipy
