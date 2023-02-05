@@ -15,11 +15,11 @@ def prepare_data():
     ])
 
     # Load the train MNIST dataset
-    train_mnist_dataset = torchvision.datasets.MNIST(root='train_data/', train=True, transform=transform,
+    train_mnist_dataset = torchvision.datasets.MNIST(root='./train_data/', train=True, transform=transform,
                                                      download=True)
     n_train_samples = len(train_mnist_dataset)
     # Load the test MNIST dataset
-    test_mnist_dataset = torchvision.datasets.MNIST(root='test_data/', train=False, transform=transform,
+    test_mnist_dataset = torchvision.datasets.MNIST(root='./test_data/', train=False, transform=transform,
                                                     download=True)
 
     if not os.path.exists("transformed_dataset.pt"):
