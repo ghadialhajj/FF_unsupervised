@@ -8,7 +8,6 @@ dependencies:
   - pillow
   - python=3.8
   - pytorch=1.13.1
-  - pytorch-cuda=11.6
   - scikit-learn
   - scipy
   - torchvision
