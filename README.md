@@ -1,15 +1,18 @@
 # FF_unsupervised
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ghadialhajj/FF_unsupervised/blob/master/main.ipynb)
-
-
 An implementation of unsupervised example of the Forward-Forward algorithm proposed
 by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ghadialhajj/FF_unsupervised/blob/master/main.ipynb) (make sure to change runtime type to GPU)
+
+File structure:  
 .  
 ├── main.py  
-├── prepare_data.py  
+├── main.ipynb  
 ├── utils.py  
+├── train_data  
+├── test_data  
+├── environment.yml  
 ├── README.md  
 └── LICENSE
 

@@ -4,7 +4,7 @@ from torch import nn
 from torch.utils.data import DataLoader, Subset
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from prepare_data import prepare_data
+from utils import prepare_data
 from sklearn.metrics import accuracy_score
 
 

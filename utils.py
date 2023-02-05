@@ -3,6 +3,47 @@ import torch
 from matplotlib import pyplot as plt
 from scipy.signal import convolve2d
 from torch import tensor, Tensor
+import torchvision.transforms as transforms
+from tqdm import tqdm
+import os
+
+
+def prepare_data():
+    # Define the transform function
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
+
+    # Load the train MNIST dataset
+    train_mnist_dataset = torchvision.datasets.MNIST(root='train_data/', train=True, transform=transform,
+                                                     download=True)
+    n_train_samples = len(train_mnist_dataset)
+    # Load the test MNIST dataset
+    test_mnist_dataset = torchvision.datasets.MNIST(root='test_data/', train=False, transform=transform,
+                                                    download=True)
+
+    if not os.path.exists("transformed_dataset.pt"):
+        random_pairs = np.random.randint(n_train_samples, size=[n_train_samples, 2])
+        random_pairs = [(row[0], row[1]) for row in random_pairs]
+
+        # Transform the data
+        transformed_dataset = [
+            create_negative_image(train_mnist_dataset[pair[0]][0].squeeze(), train_mnist_dataset[pair[1]][0].squeeze())
+            for pair in tqdm(random_pairs)]
+
+        # Save the transformed images to a folder
+        torch.save(transformed_dataset, 'transformed_dataset.pt')
+
+    # Load the transformed images
+    transformed_dataset = torch.load('transformed_dataset.pt')
+
+    # Create a dataset from the transformed images
+    dataset = torch.utils.data.TensorDataset(torch.stack(transformed_dataset))
+
+    # Create a dataloader from the dataset
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
+
+    return dataloader
 
 
 def create_mask(shape, iterations: int = 10):
@@ -70,7 +111,7 @@ def create_negative_image(image_1: Tensor, image_2: Tensor):
     mask = create_mask((image_1.shape[0], image_1.shape[1]))
 
     image_1 = torch.mul(image_1, mask)
-    image_2 = torch.mul(image_2, 1-mask)
+    image_2 = torch.mul(image_2, 1 - mask)
 
     return torch.add(image_1, image_2)
 
@@ -104,7 +145,7 @@ if __name__ == '__main__':
 
     # Create the subplot
     fig, ax = plt.subplots(1, 5)
-    images = [image_1, mask, image, 1-mask, image_2]
+    images = [image_1, mask, image, 1 - mask, image_2]
     names = ["image_1", "mask", "image", "1-mask", "image_2"]
     # Add the images to the subplot
     for i, image in enumerate(images):
