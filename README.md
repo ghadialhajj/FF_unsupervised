@@ -22,3 +22,5 @@ file that can be loaded directly into the code as a dataset, and then a dataload
 generating negative data on the fly.
 
 The `main.py` file has the `Unsupervised_FF` class along with the training procedure included inside the main block.
+
+Contributions are welcome through pull requests :)
