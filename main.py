@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torch import nn
 from torch.utils.data import DataLoader, Subset
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from utils import prepare_data
 from sklearn.metrics import accuracy_score
