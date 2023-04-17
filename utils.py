@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from scipy.signal import convolve2d
 from torch import tensor, Tensor
 import torchvision
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import os
 
 
