@@ -1,7 +1,7 @@
 # FF_unsupervised
 
 A standalone PyTorch implementation of the Forward-Forward algorithm (specifically the unsupervised example) proposed
-by [(Hinton, 2020), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
+by [(Hinton, 2022), Sec 3.2](https://www.cs.toronto.edu/~hinton/FFA13.pdf)
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ghadialhajj/FF_unsupervised/blob/master/main.ipynb) (make sure to change runtime type to GPU)
 
